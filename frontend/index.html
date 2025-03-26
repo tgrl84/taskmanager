@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire de tâches</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Gestionnaire de tâches</h1>
+        </header>
+
+        <div class="main-content">
+            <!-- Section de filtres -->
+            <div class="filters-section">
+                <h2>Filtrer les tâches</h2>
+                <div class="filter-controls">
+                    <select id="status-filter">
+                        <option value="">Tous les statuts</option>
+                        <option value="à faire">À faire</option>
+                        <option value="en cours">En cours</option>
+                        <option value="terminée">Terminée</option>
+                        <option value="annulée">Annulée</option>
+                    </select>
+
+                    <select id="priority-filter">
+                        <option value="">Toutes les priorités</option>
+                        <option value="basse">Basse</option>
+                        <option value="moyenne">Moyenne</option>
+                        <option value="haute">Haute</option>
+                        <option value="critique">Critique</option>
+                    </select>
+
+                    <input type="text" id="search-filter" placeholder="Recherche...">
+
+                    <button id="apply-filters">Appliquer</button>
+                </div>
+            </div>
+
+            <!-- Liste des tâches -->
+            <div class="tasks-list">
+                <h2>Liste des tâches</h2>
+                <div id="tasks-container"></div>
+            </div>
+
+            <!-- Formulaire d'ajout/modification -->
+            <div class="task-form">
+                <h2 id="form-title">Ajouter une tâche</h2>
+                <form id="task-form">
+                    <input type="text" id="task-title" placeholder="Titre" required>
+                    <textarea id="task-description" placeholder="Description"></textarea>
+
+                    <div class="form-row">
+                        <label for="task-due">Échéance:</label>
+                        <input type="date" id="task-due">
+                    </div>
+
+                    <div class="form-row">
+                        <label for="task-status">Statut:</label>
+                        <select id="task-status" required>
+                            <option value="à faire">À faire</option>
+                            <option value="en cours">En cours</option>
+                            <option value="terminée">Terminée</option>
+                            <option value="annulée">Annulée</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="task-priority">Priorité:</label>
+                        <select id="task-priority" required>
+                            <option value="basse">Basse</option>
+                            <option value="moyenne" selected>Moyenne</option>
+                            <option value="haute">Haute</option>
+                            <option value="critique">Critique</option>
+                        </select>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="submit" id="save-task">Enregistrer</button>
+                        <button type="button" id="cancel-edit" style="display:none;">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
