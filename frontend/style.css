@@ -26,8 +26,34 @@ header {
     gap: 20px;
 }
 
-.filters-section,
-.tasks-list,
+.filters-section {
+    flex: 1;
+    min-width: 150px;
+    max-width: 250px;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.tasks-list {
+    flex: 3;
+    min-width: 500px;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    height: 66vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.tasks-list h2 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
 .task-form {
     flex: 1;
     min-width: 300px;
@@ -52,9 +78,9 @@ header {
 }
 
 #tasks-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 10px;
 }
 
 .task-card {
@@ -63,6 +89,7 @@ header {
     border-left: 4px solid #3498db;
     border-radius: 4px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
 }
 
 .task-card.low-priority {
@@ -102,6 +129,7 @@ header {
 .task-actions {
     display: flex;
     gap: 10px;
+    margin-top: 20px;
 }
 
 .task-actions button {
