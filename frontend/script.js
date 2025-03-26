@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const statusFilter = document.getElementById('status-filter');
     const priorityFilter = document.getElementById('priority-filter');
     const searchFilter = document.getElementById('search-filter');
-    const applyFiltersBtn = document.getElementById('apply-filters');
 
     // Chargement initial des tâches
     loadTasks();
@@ -28,8 +27,25 @@ document.addEventListener('DOMContentLoaded', function() {
         resetForm();
     });
 
-    // Appliquer les filtres
-    applyFiltersBtn.addEventListener('click', function() {
+    // Recherche dynamique
+    let searchTimeout;
+
+    searchFilter.addEventListener('input', function() {
+        console.log('Changement dans la recherche'); // Ajout pour débogage
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            loadTasks();
+        }, 300);
+    });
+
+    // Filtres dynamiques
+    statusFilter.addEventListener('change', function() {
+        console.log('Changement de statut'); // Ajout pour débogage
+        loadTasks();
+    });
+
+    priorityFilter.addEventListener('change', function() {
+        console.log('Changement de priorité'); // Ajout pour débogage
         loadTasks();
     });
 
@@ -40,6 +56,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (statusFilter.value) url += `statut=${statusFilter.value}&`;
         if (priorityFilter.value) url += `priorite=${priorityFilter.value}&`;
         if (searchFilter.value) url += `q=${searchFilter.value}&`;
+        
+        console.log('Chargement des tâches avec URL:', url); // Ajout pour débogage
         
         fetch(url)
             .then(response => response.json())
@@ -63,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         tasks.forEach(task => {
             const taskElement = document.createElement('div');
-            taskElement.className = `task-card ${task.priorite === 'basse' ? 'low-priority' : ''} ${task.priorite === 'moyenne' ? 'medium-priority' : ''} ${task.priorite === 'haute' ? 'high-priority' : ''} ${task.priorite === 'critique' ? 'critical-priority' : ''}`;
+            taskElement.className = `task-card ${task.priorite === 'basse' ? 'low-priority' : ''} ${task.priorite === 'moyenne' ? 'medium-priority' : ''} ${task.priorite === 'haute' ? 'high-priority' : ''} ${task.priorite === 'critique' ? 'critical-priority' : ''} collapsed`;
             
             const dueDate = new Date(task.echeance).toLocaleDateString();
             const createdDate = new Date(task.dateCreation).toLocaleDateString();
@@ -71,18 +89,14 @@ document.addEventListener('DOMContentLoaded', function() {
             taskElement.innerHTML = `
                 <div class="task-title">${task.titre}</div>
                 <div class="task-meta">
-                    <span>Statut: ${task.statut}</span>
-                    <span>Priorité: ${task.priorite}</span>
-                    <span>Échéance: ${dueDate || 'Non définie'}</span>
+                    <span>${task.statut}</span>
+                    <span class="priority-${task.priorite.toLowerCase().replace(' ', '-')}">${task.priorite}</span>
+                    <span>${dueDate || 'Non définie'}</span>
                 </div>
                 <div class="task-description">${task.description || ''}</div>
-                <div class="task-actions">
-                    <button class="edit-btn" data-id="${task._id}">Modifier</button>
-                    <button class="delete-btn" data-id="${task._id}">Supprimer</button>
-                </div>
             `;
 
-            // Ajouter les sous-tâches avant les commentaires
+            // Ajouter les sous-tâches
             if (task.sousTaches && task.sousTaches.length > 0) {
                 const subtasksSection = document.createElement('div');
                 subtasksSection.className = 'subtasks-section';
@@ -108,24 +122,57 @@ document.addEventListener('DOMContentLoaded', function() {
                 taskElement.appendChild(subtasksSection);
             }
 
-            // Ajouter la section des commentaires après les sous-tâches
+            // Ajouter la section des commentaires
             taskElement.appendChild(displayComments(task));
+
+            // Ajouter le footer avec les boutons d'action
+            const taskFooter = document.createElement('div');
+            taskFooter.className = 'task-footer';
+            taskFooter.innerHTML = `   
+                <div class="task-actions">
+                    <button class="edit-btn" data-id="${task._id}">Modifier</button>
+                    <button class="delete-btn" data-id="${task._id}">Supprimer</button>
+                </div>
+                <button class="toggle-btn down">▼</button>
+            `;
+            taskElement.appendChild(taskFooter);
+
+            // Gestion du clic sur la flèche
+            const toggleBtn = taskFooter.querySelector('.toggle-btn');
+            const toggleTask = () => {
+                taskElement.classList.toggle('collapsed');
+                toggleBtn.classList.toggle('down');
+                toggleBtn.classList.toggle('up');
+            };
+
+            toggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleTask();
+            });
+
+            // Gestion du clic sur la tâche
+            taskElement.addEventListener('click', function(e) {
+                // Ne pas déclencher le toggle si on clique sur un élément interactif
+                if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    return;
+                }
+                toggleTask();
+            });
             
             tasksContainer.appendChild(taskElement);
         });
 
-        // Ajouter l'événement pour ajouter un commentaire
-        document.querySelectorAll('.add-comment-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const taskId = this.getAttribute('data-id');
-                const commentInput = this.previousElementSibling;
-                const commentContent = commentInput.value.trim();
-                
-                if (commentContent) {
-                    addComment(taskId, commentContent);
-                    commentInput.value = ''; // Vider le champ après l'ajout
-                }
-            });
+        // Ajouter ces écouteurs d'événements après le chargement des tâches
+        tasksContainer.addEventListener('click', function(e) {
+            if (e.target.classList.contains('edit-btn')) {
+                const taskId = e.target.dataset.id;
+                editTask(taskId);
+            }
+            
+            if (e.target.classList.contains('delete-btn')) {
+                const taskId = e.target.dataset.id;
+                deleteTask(taskId);
+            }
         });
     }
 

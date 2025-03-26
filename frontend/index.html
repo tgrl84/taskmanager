@@ -15,35 +15,30 @@
         </header>
 
         <div class="main-content">
-            <!-- Section de filtres -->
-            <div class="filters-section">
-                <h2>Filtrer les tâches</h2>
-                <div class="filter-controls">
-                    <select id="status-filter">
-                        <option value="">Tous les statuts</option>
-                        <option value="à faire">À faire</option>
-                        <option value="en cours">En cours</option>
-                        <option value="terminée">Terminée</option>
-                        <option value="annulée">Annulée</option>
-                    </select>
-
-                    <select id="priority-filter">
-                        <option value="">Toutes les priorités</option>
-                        <option value="basse">Basse</option>
-                        <option value="moyenne">Moyenne</option>
-                        <option value="haute">Haute</option>
-                        <option value="critique">Critique</option>
-                    </select>
-
-                    <input type="text" id="search-filter" placeholder="Recherche...">
-
-                    <button id="apply-filters">Appliquer</button>
-                </div>
-            </div>
-
             <!-- Liste des tâches -->
             <div class="tasks-list">
                 <h2>Liste des tâches</h2>
+                <div class="filters-section">
+                    <div class="filter-controls">
+                        <select id="status-filter">
+                            <option value="">Tous les statuts</option>
+                            <option value="à faire">À faire</option>
+                            <option value="en cours">En cours</option>
+                            <option value="terminée">Terminée</option>
+                            <option value="annulée">Annulée</option>
+                        </select>
+
+                        <select id="priority-filter">
+                            <option value="">Toutes les priorités</option>
+                            <option value="basse">Basse</option>
+                            <option value="moyenne">Moyenne</option>
+                            <option value="haute">Haute</option>
+                            <option value="critique">Critique</option>
+                        </select>
+
+                        <input type="text" id="search-filter" placeholder="Recherche...">
+                    </div>
+                </div>
                 <div id="tasks-container"></div>
             </div>
 
