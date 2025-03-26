@@ -81,32 +81,75 @@ document.addEventListener('DOMContentLoaded', function() {
                     <button class="delete-btn" data-id="${task._id}">Supprimer</button>
                 </div>
             `;
+
+            // Ajouter les sous-tâches avant les commentaires
+            if (task.sousTaches && task.sousTaches.length > 0) {
+                const subtasksSection = document.createElement('div');
+                subtasksSection.className = 'subtasks-section';
+                subtasksSection.innerHTML = '<h3>Sous-tâches</h3>';
+               
+                const subtasksList = document.createElement('div');
+                subtasksList.className = 'subtasks-list';
+                
+                task.sousTaches.forEach(subtask => {
+                    const subtaskItem = document.createElement('div');
+                    subtaskItem.className = 'subtask-item';
+                    subtaskItem.innerHTML = `
+                        <div class="subtask-content">
+                            <span class="subtask-title">${subtask.titre}</span>
+                            ${subtask.echeance ? `<span class="subtask-due">(${new Date(subtask.echeance).toLocaleDateString()})</span>` : ''}
+                        </div>
+                        <div class="subtask-status">${subtask.statut}</div>
+                    `;
+                    subtasksList.appendChild(subtaskItem);
+                });
+                
+                subtasksSection.appendChild(subtasksList);
+                taskElement.appendChild(subtasksSection);
+            }
+
+            // Ajouter la section des commentaires après les sous-tâches
+            taskElement.appendChild(displayComments(task));
             
             tasksContainer.appendChild(taskElement);
         });
 
-        // Ajout des événements aux boutons
-        document.querySelectorAll('.edit-btn').forEach(btn => {
+        // Ajouter l'événement pour ajouter un commentaire
+        document.querySelectorAll('.add-comment-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                editTask(this.getAttribute('data-id'));
-            });
-        });
-
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                deleteTask(this.getAttribute('data-id'));
+                const taskId = this.getAttribute('data-id');
+                const commentInput = this.previousElementSibling;
+                const commentContent = commentInput.value.trim();
+                
+                if (commentContent) {
+                    addComment(taskId, commentContent);
+                    commentInput.value = ''; // Vider le champ après l'ajout
+                }
             });
         });
     }
 
     // Enregistrer une tâche (création ou modification)
     function saveTask() {
+        const subtasks = [];
+        document.querySelectorAll('.subtask-input').forEach(subtask => {
+            const title = subtask.querySelector('.subtask-title').value;
+            const due = subtask.querySelector('.subtask-due').value;
+            if (title) {
+                subtasks.push({
+                    titre: title,
+                    echeance: due || null
+                });
+            }
+        });
+
         const taskData = {
             titre: document.getElementById('task-title').value,
             description: document.getElementById('task-description').value,
             echeance: document.getElementById('task-due').value,
             statut: document.getElementById('task-status').value,
             priorite: document.getElementById('task-priority').value,
+            sousTaches: subtasks,
             auteur: { nom: "Utilisateur", prenom: "Test", email: "test@example.com" }
         };
 
@@ -145,6 +188,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('task-due').value = task.echeance ? task.echeance.split('T')[0] : '';
                 document.getElementById('task-status').value = task.statut;
                 document.getElementById('task-priority').value = task.priorite;
+
+                // Afficher les sous-tâches
+                const subtasksContainer = document.getElementById('subtasks-container');
+                subtasksContainer.innerHTML = '';
+                if (task.sousTaches && task.sousTaches.length > 0) {
+                    task.sousTaches.forEach(subtask => {
+                        const subtaskInput = document.createElement('div');
+                        subtaskInput.className = 'subtask-input';
+                        subtaskInput.innerHTML = `
+                            <input type="text" class="subtask-title" value="${subtask.titre}">
+                            <input type="date" class="subtask-due" value="${subtask.echeance || ''}">
+                            <button type="button" class="remove-subtask">×</button>
+                        `;
+                        subtasksContainer.appendChild(subtaskInput);
+                    });
+                }
             })
             .catch(error => {
                 console.error('Erreur:', error);
@@ -175,4 +234,93 @@ document.addEventListener('DOMContentLoaded', function() {
         formTitle.textContent = 'Ajouter une tâche';
         cancelEditBtn.style.display = 'none';
     }
+
+    // Ajouter cette fonction pour afficher les commentaires
+    function displayComments(task) {
+        const commentsContainer = document.createElement('div');
+        commentsContainer.className = 'task-comments';
+        
+        // Affichage des commentaires existants
+        if (task.commentaires && task.commentaires.length > 0) {
+            const commentsList = document.createElement('div');
+            commentsList.className = 'comments-list';
+            
+            task.commentaires.forEach(comment => {
+                const commentElement = document.createElement('div');
+                commentElement.className = 'comment';
+                commentElement.innerHTML = `
+                    <div class="comment-header">
+                        <span class="comment-author">${comment.auteur}</span>
+                        <span class="comment-date">${new Date(comment.date).toLocaleString()}</span>
+                    </div>
+                    <div class="comment-content">${comment.contenu}</div>
+                `;
+                commentsList.appendChild(commentElement);
+            });
+            
+            commentsContainer.appendChild(commentsList);
+        }
+
+        // Zone d'ajout de commentaire (placée après la liste des commentaires)
+        const commentForm = document.createElement('div');
+        commentForm.className = 'comment-form';
+        commentForm.innerHTML = `
+            <textarea class="comment-input" placeholder="Ajouter un commentaire..."></textarea>
+            <button class="add-comment-btn" data-id="${task._id}">Ajouter</button>
+        `;
+        commentsContainer.appendChild(commentForm);
+
+        return commentsContainer;
+    }
+
+    // Fonction pour ajouter un commentaire
+    function addComment(taskId, content) {
+        const commentData = {
+            auteur: "Utilisateur", // Vous pouvez remplacer par l'utilisateur connecté
+            contenu: content
+        };
+
+        fetch(`${apiUrl}/${taskId}/comments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(commentData)
+        })
+        .then(response => response.json())
+        .then(() => {
+            loadTasks();
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Erreur lors de l\'ajout du commentaire');
+        });
+    }
+
+    // Ajouter cette fonction pour gérer les sous-tâches
+    function handleSubtasks() {
+        const subtasksContainer = document.getElementById('subtasks-container');
+        
+        // Ajouter une sous-tâche
+        document.getElementById('add-subtask').addEventListener('click', function() {
+            const subtaskInput = document.createElement('div');
+            subtaskInput.className = 'subtask-input';
+            subtaskInput.innerHTML = `
+                <input type="text" class="subtask-title" placeholder="Titre de la sous-tâche">
+                <input type="date" class="subtask-due">
+                <button type="button" class="remove-subtask">×</button>
+            `;
+            subtasksContainer.appendChild(subtaskInput);
+        });
+
+        // Supprimer une sous-tâche
+        subtasksContainer.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-subtask')) {
+                e.target.parentElement.remove();
+            }
+        });
+    }
+
+    // Appeler handleSubtasks au chargement du DOM
+    handleSubtasks();
 });

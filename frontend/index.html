@@ -79,6 +79,20 @@
                         </select>
                     </div>
 
+                    <div class="form-row">
+                        <label for="subtasks">Sous-tâches:</label>
+                        <div class="subtasks-container">
+                            <div id="subtasks-container">
+                                <div class="subtask-input">
+                                    <input type="text" class="subtask-title" placeholder="Titre de la sous-tâche">
+                                    <input type="date" class="subtask-due">
+                                    <button type="button" class="remove-subtask">×</button>
+                                </div>
+                            </div>
+                            <button type="button" id="add-subtask">Ajouter une sous-tâche</button>
+                        </div>
+                    </div>
+
                     <div class="form-buttons">
                         <button type="submit" id="save-task">Enregistrer</button>
                         <button type="button" id="cancel-edit" style="display:none;">Annuler</button>
