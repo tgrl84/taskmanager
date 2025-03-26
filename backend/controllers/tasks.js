@@ -68,3 +68,44 @@ exports.deleteTask = async (req, res, next) => {
     next(err);
   }
 };
+
+// Ajouter un commentaire
+exports.addComment = async (req, res, next) => {
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) {
+      return res.status(404).json({ message: 'Tâche non trouvée' });
+    }
+    
+    const newComment = {
+      auteur: req.body.auteur,
+      contenu: req.body.contenu
+    };
+    
+    task.commentaires.push(newComment);
+    const updatedTask = await task.save();
+    
+    res.status(201).json(updatedTask);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Supprimer un commentaire
+exports.deleteComment = async (req, res, next) => {
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) {
+      return res.status(404).json({ message: 'Tâche non trouvée' });
+    }
+    
+    task.commentaires = task.commentaires.filter(
+      comment => comment._id.toString() !== req.params.commentId
+    );
+    
+    const updatedTask = await task.save();
+    res.json(updatedTask);
+  } catch (err) {
+    next(err);
+  }
+};
